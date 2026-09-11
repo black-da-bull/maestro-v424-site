@@ -1,15 +1,11 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const securityHeaders = [
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'Referrer-Policy', value: 'no-referrer' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+  { key: 'X-Robots-Tag', value: 'noindex, nofollow' }
+];
+export default {
   reactStrictMode: true,
-  poweredByHeader: false,
-  async headers() {
-    const security = [
-      { key: 'X-Frame-Options', value: 'DENY' },
-      { key: 'X-Content-Type-Options', value: 'nosniff' },
-      { key: 'Referrer-Policy', value: 'no-referrer' },
-      { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' }
-    ];
-    return [{ source: '/:path*', headers: security }];
-  }
+  async headers(){ return [{ source: '/(.*)', headers: securityHeaders }]; }
 };
-export default nextConfig;

@@ -1,9 +1,9 @@
 {
   "name": "momoney-maestro-console",
-  "version": "4.2.4",
+  "version": "5.0.0-c",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "build": "npm test && next build",
     "start": "next start",
     "test": "node --test test/*.test.js"
   },
