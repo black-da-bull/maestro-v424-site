@@ -29,10 +29,13 @@ jobs:
           a1f8f37e277fde5d8e5748008cbeb3173adab0a7c72c548bed5005bc0fc0e1a5  .bootstrap/part04
           d50bd0a71787f35fc0d5d16178ddb4b19a790afd9c156892f8dd605ffa4742ca  .bootstrap/part05
           20793c7045b0647f4bb9e36bc5b46127c92267d4aae2bfc9c20485fe3725f16b  .bootstrap/part06
-          36a590e602691745eff32ddf721204c267d85bfe1d6c1b1b1de7debdeb83f6dd  .bootstrap/part07
+          c740be0fe0b41bb7068d1593825559fcc86cd526bf5f12cbd53f2933282d0107  .bootstrap/part07_00
+          64ba4bd86f07af92bc2cbd38d14de6e9477b06a49f82e19a5e4426d94cc7eac8  .bootstrap/part07_01
+          ed61e9cbc0c2ed83773af166ff91c99e2d20d241f8246135b89d35057a2e746e  .bootstrap/part07_02
+          3b2ef038618e4a103d0f538a01da3a1946d6f623d9589469fe5677fad9c1a3ba  .bootstrap/part07_03
           EOF
           sha256sum -c /tmp/chunks.sha256
-          cat .bootstrap/part00 .bootstrap/part01 .bootstrap/part02 .bootstrap/part03 .bootstrap/part04 .bootstrap/part05 .bootstrap/part06 .bootstrap/part07 | base64 -d > /tmp/maestro-v5c.tgz
+          cat .bootstrap/part00 .bootstrap/part01 .bootstrap/part02 .bootstrap/part03 .bootstrap/part04 .bootstrap/part05 .bootstrap/part06 .bootstrap/part07_00 .bootstrap/part07_01 .bootstrap/part07_02 .bootstrap/part07_03 | base64 -d > /tmp/maestro-v5c.tgz
           echo "5370b7ca7c142ee89906200de08df410dd99c1ed9c139e96e4d72cf39297b19f  /tmp/maestro-v5c.tgz" | sha256sum -c -
       - name: Replace console tree
         run: |
