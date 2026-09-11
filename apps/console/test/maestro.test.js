@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {REVIEWERS,buildRelease,fixture,makeCandidate,prepare,status,validateCouncil} from '../lib/maestro.js';
+const review=c=>({candidate_digest:c.candidate_digest,rounds:[{claims:REVIEWERS.map(role=>({role,verdict:'ACCEPT_WITH_LIMITS'}))}]});
+test('graph and UST contract',()=>{const s=status();assert.equal(s.graph.nodes,18);assert.equal(s.profile.order.length,8)});
+test('fixture compiles deterministically',()=>{const f=fixture(),a=makeCandidate(f.request,f.plan,f.cues),b=makeCandidate(f.request,f.plan,f.cues);assert.equal(a.candidate_digest,b.candidate_digest);assert.ok(a.checks.every(x=>x.status==='PASS'))});
+test('source mutation fails closed',()=>{const f=fixture();f.request.raw_lyrics+='\nALTERED';assert.throws(()=>makeCandidate(f.request,f.plan,f.cues),/Plan does not match/)});
+test('minimal title and style routes compose',()=>{assert.equal(prepare({request:'Create a song concept.',title:'Seed',style_brief:'alt R&B',operation:'original',raw_lyrics:''}).route,'COMPOSE')});
+test('review binds to exact candidate',()=>{const f=fixture(),c=makeCandidate(f.request,f.plan,f.cues);assert.equal(validateCouncil(review(c),c).status,'PASS');const bad=review(c);bad.candidate_digest='stale';assert.throws(()=>validateCouncil(bad,c),/different candidate/)});
+test('release remains prompt-only with NOT_RUN evidence',()=>{const f=fixture(),c=makeCandidate(f.request,f.plan,f.cues),o=buildRelease(f.request,f.plan,f.cues,review(c));assert.equal(o.archive.subarray(0,2).toString(),'PK');assert.match(o.archive.toString('latin1'),/stage_receipts\.json/);assert.match(o.archive.toString('latin1'),/NOT_RUN/)});
