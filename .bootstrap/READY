@@ -1,5 +1,5 @@
 payload_sha256=5370b7ca7c142ee89906200de08df410dd99c1ed9c139e96e4d72cf39297b19f
 local_tests=26/26
-transport=8 independently hashed chunks
+transport=7 full chunks + 4 independently hashed final subchunks
 contract=Technical UST checklist -> resident worker reroute -> zero unresolved nulls -> lock -> two Suno surfaces
-trigger=2
+trigger=3
