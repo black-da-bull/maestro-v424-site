@@ -31,5 +31,22 @@ function zip(files){const ls=[],cs=[];let off=0;for(const[name,val]of Object.ent
 export function buildRelease(e,p,c,r){const candidate=makeCandidate(e,p,c),validation=validateCouncil(r,candidate);const files={'suno_lyrics.txt':candidate.macro,'suno_styles.txt':candidate.styles,'verification_log.json':JSON.stringify({status:'PASS',scope:'PROMPT_ONLY',candidate_digest:candidate.candidate_digest,external:{render:'NOT_RUN',rights:'NOT_RUN',hpa:'NOT_RUN',dsp:'NOT_RUN'}},null,2),'render_receipt.json':JSON.stringify({status:'NOT_RUN'}),'rights_package.json':JSON.stringify({status:'NOT_RUN'}),'hpa_feedback.json':JSON.stringify({status:'NOT_RUN'}),'dsp_specs.json':JSON.stringify({status:'NOT_RUN'}),'stage_receipts.json':JSON.stringify(NODES.map(id=>({node_id:id,status:['N13.1','N14.1','N15.1','N16.1'].includes(id)?'NOT_RUN':'PASS'})))};return{candidate,validation,archive:zip(files)}}
 export function status(){return{version:VERSION,adapter:'nextjs-server-v2',graph:{nodes:NODES.length,edges:19,execution_order:NODES.length},nodes:NODES.map((id,i)=>({id,purpose:NODE_NAMES[i],handler:i%3===0?'runtime':'host',steps:['contract']})),order:NODES,profile:PROFILE,engine_sha256:digest(VERSION+NODES.join('|')),audio:'NOT_CONNECTED',rights:'NOT_RUN'}}
 export function fixture(){const request={request:'Upgrade this remix for a QA fixture.',raw_lyrics:'[Verse 1]\nQA_ALPHA\nQA_BETA\n[Chorus]\nQA_HOOK\nQA_HOOK_2\n[Exit]\nQA_END',lyric_policy:'preserve',operation:'remix',infer:true};const sd=sourceDigest(request);const plan={source_digest:sd,show_summary:'Synthetic QA fixture.',theory:{meter:'4/4'},voice:{delivery:'clear'},crew:[{name:'Lead',role:'Vocal',adlib:''}],content_bank:{L1:{text:'QA_ALPHA',source_indices:[0]},L2:{text:'QA_BETA',source_indices:[1]},L3:{text:'QA_HOOK',source_indices:[2]},L4:{text:'QA_HOOK_2',source_indices:[3]},L5:{text:'QA_END',source_indices:[4]}},sections:[{id:'S1',label:'Verse 1',bars:4,feel:'steady',lines:['L1','L2']},{id:'S2',label:'Chorus',bars:4,feel:'lift',lines:['L3','L4']},{id:'S3',label:'Exit',bars:2,feel:'resolve',lines:['L5']}],sequence:['S1','S2','S3'],exit_section:'S3',style:{genre:'fixture'},timbre:{tone:'neutral'},performance:{gesture:'controlled'}};return{request,plan,cues:{cues:[]}}}
-export function hostInstructions(e){return `Return JSON with plan and cues for Maestro ${VERSION}. Set plan.source_digest exactly to ${sourceDigest(e)}. Preserve protected source lines exactly when lyric_policy is preserve. Keep compiled Lyrics under 4800 chars and Styles under 1000. Do not claim rendered audio, rights, HPA, or DSP execution.`}
-export function reviewInstructions(c){return `Return a JSON review bound to candidate_digest ${c.candidate_digest}. Include claims from Critic, Stylist, Engineer, and DevilsAdvocate. Use ACCEPT or ACCEPT_WITH_LIMITS unless a real blocking defect exists. Do not claim independent expert review or measured audio quality.`}
+export function hostInstructions(e){const lines=sourceLines(e);return [
+`You are the semantic planning host for MoMoney Maestro ${VERSION}. Return one JSON object with exactly two keys: plan and cues.`,
+`Set plan.source_digest exactly to ${sourceDigest(e)}.`,
+'plan requires: source_digest, show_summary, theory, voice, crew, content_bank, sections, sequence, exit_section, style, timbre, performance.',
+'crew items are {name,role,adlib}. content_bank items are {text,source_indices}. sections are {id,label,bars,feel,lines}. sequence lists section ids in performed order; exit_section must be final.',
+'For protected source lyrics, map every non-header source line verbatim and in order with zero-based source_indices; do not add or rewrite protected lines.',
+'Keep compiled Lyrics under 4800 characters and Styles/show_summary under 1000 characters.',
+'cues must be {cues:[{scope,instruction}]}. Cues are instructions only, never proof of rendered processing.',
+'Do not claim rendered audio, licenses, rights clearance, HPA measurements, DSP execution, or independent expert review.',
+lines.length?`There are ${lines.length} protected non-header source lines.`:'No protected source lines were supplied; original lyrics may be proposed for this compose request.'
+].join('\n\n')}
+export function reviewInstructions(c){return [
+'You are one AI host simulating four review perspectives, not four independent experts. Return one JSON object.',
+`candidate_digest must equal ${c.candidate_digest}.`,
+'Return {candidate_digest, rounds:[{claims:[...]}]}.',
+'Include exactly these role perspectives at minimum: Critic, Stylist, Engineer, DevilsAdvocate.',
+'Each claim is {role, verdict, finding}. verdict must be ACCEPT or ACCEPT_WITH_LIMITS unless a genuine blocking defect exists.',
+'Do not claim measured audio quality, rights clearance, rendered output, or independent expert review.'
+].join('\n\n')}
