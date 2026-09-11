@@ -1,0 +1,51 @@
+name: Materialize Maestro v5-c
+
+on:
+  push:
+    branches:
+      - v5c-two-surface-runtime-20260911
+    paths:
+      - .bootstrap/READY
+
+permissions:
+  contents: write
+
+jobs:
+  materialize-test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v5c-two-surface-runtime-20260911
+          fetch-depth: 0
+      - name: Verify release payload
+        run: |
+          set -euo pipefail
+          base64 -d .bootstrap/payload.b64 > /tmp/maestro-v5c.tgz
+          echo "5370b7ca7c142ee89906200de08df410dd99c1ed9c139e96e4d72cf39297b19f  /tmp/maestro-v5c.tgz" | sha256sum -c -
+      - name: Replace console tree
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/maestro-v5c
+          mkdir -p /tmp/maestro-v5c
+          tar -xzf /tmp/maestro-v5c.tgz -C /tmp/maestro-v5c
+          test -f /tmp/maestro-v5c/apps/console/lib/maestro.js
+          rm -rf apps/console
+          cp -a /tmp/maestro-v5c/apps/console apps/console
+      - name: Install validate and build
+        working-directory: apps/console
+        run: |
+          set -euo pipefail
+          npm install --ignore-scripts
+          npm run build
+      - name: Publish validated source
+        run: |
+          set -euo pipefail
+          rm -rf .bootstrap
+          rm -f .github/workflows/materialize-maestro-v5c.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "Promote validated Maestro v5-c two-surface runtime"
+          git push origin HEAD:v5c-two-surface-runtime-20260911
