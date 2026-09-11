@@ -18,10 +18,21 @@ jobs:
         with:
           ref: v5c-two-surface-runtime-20260911
           fetch-depth: 0
-      - name: Verify release payload
+      - name: Verify release chunks and payload
         run: |
           set -euo pipefail
-          base64 -d .bootstrap/payload.b64 > /tmp/maestro-v5c.tgz
+          cat > /tmp/chunks.sha256 <<'EOF'
+          25397f8a85edb6679ac7b64ed8b5f928eabb81cc7e75053528fc5994c58f62d4  .bootstrap/part00
+          ab93977dcdd009b1136ae50b43390a21d03a65faf0626802f6defa3ec491292b  .bootstrap/part01
+          ef85dcd21a64445b9c8466260e92d34bc3e03bf93ab0fb9658dc02ab75861f9b  .bootstrap/part02
+          83413fd946a61429bce87e769c3746d3300f7287fdeab18dec8e21274407d8ad  .bootstrap/part03
+          a1f8f37e277fde5d8e5748008cbeb3173adab0a7c72c548bed5005bc0fc0e1a5  .bootstrap/part04
+          d50bd0a71787f35fc0d5d16178ddb4b19a790afd9c156892f8dd605ffa4742ca  .bootstrap/part05
+          20793c7045b0647f4bb9e36bc5b46127c92267d4aae2bfc9c20485fe3725f16b  .bootstrap/part06
+          36a590e602691745eff32ddf721204c267d85bfe1d6c1b1b1de7debdeb83f6dd  .bootstrap/part07
+          EOF
+          sha256sum -c /tmp/chunks.sha256
+          cat .bootstrap/part00 .bootstrap/part01 .bootstrap/part02 .bootstrap/part03 .bootstrap/part04 .bootstrap/part05 .bootstrap/part06 .bootstrap/part07 | base64 -d > /tmp/maestro-v5c.tgz
           echo "5370b7ca7c142ee89906200de08df410dd99c1ed9c139e96e4d72cf39297b19f  /tmp/maestro-v5c.tgz" | sha256sum -c -
       - name: Replace console tree
         run: |
